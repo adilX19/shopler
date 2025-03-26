@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to YourStore - Shop Quality Products Online{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('{% static "images/hero-bg.jpg" %}') no-repeat center center;
+        background-size: cover;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: white;
+    }
+
+    .category-card {
+        transition: transform 0.3s;
+        height: 100%;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-img-container {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .product-img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    .badge-sale {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section mb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="display-4 fw-bold mb-4">Quality Products for Every Need</h1>
+                <p class="lead mb-4">Discover the best products at affordable prices. Shop with confidence with our
+                    30-day money-back guarantee.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="#" class="btn btn-primary btn-lg px-4 me-sm-3">Shop Now</a>
+                    <a href="#" class="btn btn-outline-light btn-lg px-4">Browse Categories</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Section -->
+<section class="mb-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold">Shop by Category</h2>
+                <p class="text-muted">Browse our wide selection of products by category</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="#" class="btn btn-outline-primary">View All Categories</a>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for category in categories %}
+            <div class="col">
+                <div class="card h-100 category-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-{{ category.icon|default:'tag' }} fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text text-muted">{{ category.description|truncatechars:60 }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 text-center">
+                        <a href="#" class="btn btn-sm btn-outline-primary">Browse
+                            Products</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="mb-5 py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="fw-bold">Featured Products</h2>
+                <p class="text-muted">Check out our latest and most popular items</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="#" class="btn btn-outline-primary">View All Products</a>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for product in featured_products %}
+            <div class="col">
+                <div class="card h-100 product-card">
+                    {% if product.discount_price %}
+                    <span class="badge bg-danger badge-sale">SALE</span>
+                    {% endif %}
+                    <div class="product-img-container p-3">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="product-img" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="{% static 'images/product-placeholder.png' %}" class="product-img"
+                            alt="{{ product.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">{{ product.category.name }}</span>
+                            <div class="text-warning">
+                                {% for i in '12345'|make_list %}
+                                {% if forloop.counter <= product.average_rating %} <i class="fas fa-star"></i>
+                                    {% elif forloop.counter <= product.average_rating|add:'0.5' %} <i
+                                        class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                        {% endfor %}
+                            </div>
+                        </div>
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted" style="font-size: 0.9rem;">
+                            {{ product.description|truncatechars:60 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                {% if product.discount_price %}
+                                <span class="text-muted text-decoration-line-through">${{ product.price }}</span>
+                                <span class="ms-2 fw-bold text-danger">${{ product.discount_price }}</span>
+                                {% else %}
+                                <span class="fw-bold">${{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                            {% if product.is_available %}
+                            <span class="badge bg-success">In Stock</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent d-grid">
+                        <div class="btn-group" role="group">
+                            <a href="#" class="btn btn-outline-primary">View
+                                Details</a>
+                            {% if product.is_available %}
+                            <a href="#" class="btn btn-primary">
+                                <i class="fas fa-cart-plus"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">No featured products available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Special Offers Section -->
+<section class="mb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="card bg-primary text-white overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-md-7 p-4 d-flex flex-column position-static">
+                            <h3 class="fw-bold">Special Discount</h3>
+                            <p class="mb-3">Get up to 30% off on all electronics this week!</p>
+                            <a href="#"
+                                class="btn btn-light mt-auto align-self-start">Shop Now</a>
+                        </div>
+                        <div class="col-md-5 d-none d-md-block">
+                            <div style="height: 100%; min-height: 200px; background: url('{% static "
+                                images/electronics-banner.jpg" %}') no-repeat center center; background-size: cover;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-success text-white overflow-hidden">
+                    <div class="row g-0">
+                        <div class="col-md-7 p-4 d-flex flex-column position-static">
+                            <h3 class="fw-bold">New Arrivals</h3>
+                            <p class="mb-3">Check out our latest fashion collection for this season!</p>
+                            <a href="#"
+                                class="btn btn-light mt-auto align-self-start">Explore Now</a>
+                        </div>
+                        <div class="col-md-5 d-none d-md-block">
+                            <div style="height: 100%; min-height: 200px; background: url('{% static "
+                                images/fashion-banner.jpg" %}') no-repeat center center; background-size: cover;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 bg-light mb-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">What Our Customers Say</h2>
+            <p class="text-muted">Trusted by thousands of satisfied customers</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <div class="text-warning me-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div>5.0</div>
+                        </div>
+                        <p class="card-text mb-4">"I've been shopping here for years and have never been disappointed.
+                            The quality of products and customer service is outstanding!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img src="{% static 'images/avatar1.jpg' %}" alt="Customer" width="50" height="50"
+                                    class="rounded-circle">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Sarah Johnson</h6>
+                                <small class="text-muted">Loyal Customer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <div class="text-warning me-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <div>4.5</div>
+                        </div>
+                        <p class="card-text mb-4">"Fast shipping and great prices. The products are exactly as
+                            described. Will definitely shop here again!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img src="{% static 'images/avatar2.jpg' %}" alt="Customer" width="50" height="50"
+                                    class="rounded-circle">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Michael Chen</h6>
+                                <small class="text-muted">Repeat Buyer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <div class="text-warning me-2">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div>5.0</div>
+                        </div>
+                        <p class="card-text mb-4">"I love the variety of products available. The website is easy to
+                            navigate and checkout is seamless. Highly recommend!"</p>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <img src="{% static 'images/avatar3.jpg' %}" alt="Customer" width="50" height="50"
+                                    class="rounded-circle">
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0">Emily Rodriguez</h6>
+                                <small class="text-muted">Happy Customer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="mb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card border-0 bg-dark text-white shadow">
+                    <div class="card-body p-5 text-center">
+                        <h3 class="card-title mb-3">Subscribe to Our Newsletter</h3>
+                        <p class="card-text mb-4">Stay updated with our latest products and exclusive offers.</p>
+                        <form class="row g-3 justify-content-center">
+                            <div class="col-md-8">
+                                <input type="email" class="form-control form-control-lg"
+                                    placeholder="Your email address">
+                            </div>
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">Subscribe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
